@@ -15,9 +15,13 @@ def load_and_split_pdf(pdf_file, chunk_size=1000, chunk_overlap=200):
         List of Document objects
     """
     # Create a temporary file to save the uploaded file
-    with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_file:
-        tmp_file.write(pdf_file.getvalue())
-        tmp_path = tmp_file.name
+
+    if isinstance(pdf_file, str):
+        tmp_path = pdf_file
+    else:
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_file:
+           tmp_file.write(pdf_file.getvalue())
+           tmp_path = tmp_file.name
     
     # Load the PDF
     loader = PyPDFLoader(tmp_path)
@@ -32,3 +36,4 @@ def load_and_split_pdf(pdf_file, chunk_size=1000, chunk_overlap=200):
     # Remove the temporary file
     os.unlink(tmp_path)
     return chunks
+
