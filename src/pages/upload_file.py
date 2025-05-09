@@ -3,7 +3,7 @@ import os
 import streamlit as st
 from utils.rag_embeddings.chunking import load_and_split_pdf
 from utils.rag_embeddings.vector_store import create_vector_store
-from utils.rag_embeddings.retriever import create_retriever
+from utils.rag_embeddings.retriever import create_hybrid_retriever
 from utils.rag_embeddings.generation import create_generator
 import os 
 from dotenv import load_dotenv
@@ -59,7 +59,7 @@ def render():
                     
                     # Step 3: Create retriever
                     st.write("🔄 Setting up retriever...")
-                    retriever = create_retriever(vector_store=vector_store)
+                    retriever = create_hybrid_retriever(vector_store=vector_store)
                     st.session_state.retriever = retriever
                     st.write("✅ Retriever ready")
                     

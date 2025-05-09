@@ -2,10 +2,6 @@ from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings.sentence_transformer import SentenceTransformerEmbeddings
 from langchain_community.retrievers import BM25Retriever
 from langchain.retrievers import EnsembleRetriever
-from langchain_community.document_loaders import PyPDFLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from vector_store import create_vector_store
-from chunking import load_and_split_pdf
 
 def create_hybrid_retriever(vector_store,k=4,embedding_model_name= "all-MiniLM-L6-v2"):
     """
@@ -17,7 +13,7 @@ def create_hybrid_retriever(vector_store,k=4,embedding_model_name= "all-MiniLM-L
         embedding_model_name: Name of the sentence transformer model to use for embeddings
         
     Returns:
-        A retriever instance
+        A hybrid retriever instance
     """
     # If vector_store is a string, load it from disk
     if isinstance(vector_store, str):
@@ -43,11 +39,3 @@ def create_hybrid_retriever(vector_store,k=4,embedding_model_name= "all-MiniLM-L
                         )
     
     return hybrid_retriever
-
-file_path = "C:/Users/dceka/OneDrive/Desktop/Swathika/innovapth/ML_AI/GEN_AI/temp/customer_care_agent/Tesla.pdf"
-chunks = load_and_split_pdf(file_path)
-vector_store = create_vector_store(chunks)
-hybrid_retriever = create_hybrid_retriever(vector_store=vector_store)
-results = hybrid_retriever.get_relevant_documents("How fast can I charge my Tesla model Y?")
-for i, doc in enumerate(results):
-    print(f"{i+1}. {doc.page_content}")
