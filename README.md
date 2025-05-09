@@ -33,7 +33,7 @@ Install Dependencies Install required Python packages from src/requirements.txt:
 pip install -r requirements.txt
 
 Configure Environment Variables Set your OpenAI API key by creating a .env file inside the src/ directory:
-OPENAI_API_KEY=your_api_key_here
+OPENAI_API_KEY=PI_KEY1
 
 Prepare Resources Place Tesla owner manuals (PDFs) inside:
 resources/ This content will be processed and indexed for retrieval.
