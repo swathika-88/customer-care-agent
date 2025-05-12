@@ -2,6 +2,7 @@ from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings.sentence_transformer import SentenceTransformerEmbeddings
 from langchain_community.retrievers import BM25Retriever
 from langchain.retrievers import EnsembleRetriever
+from langchain.schema import Document
 
 def create_hybrid_retriever(vector_store,k=4,embedding_model_name= "all-MiniLM-L6-v2"):
     """
@@ -23,12 +24,27 @@ def create_hybrid_retriever(vector_store,k=4,embedding_model_name= "all-MiniLM-L
     # Create FAISS retriever
     faiss_retriever = vector_store.as_retriever(search_kwargs={"k": k})
 
-    # Extract original documents
-    docs = vector_store.docstore._dict.values()
+     # Extract proper Document objects from the vector store
+    # This ensures we get proper Document objects with page_content and metadata
+    all_docs = []
+    for doc_id, doc in vector_store.docstore._dict.items():
+        # Make sure we're working with proper Document objects
+        if isinstance(doc, Document):
+            all_docs.append(doc)
+        else:
+            # If it's not a Document object, try to convert it
+            try:
+                all_docs.append(Document(
+                    page_content=doc.page_content,
+                    metadata=doc.metadata
+                ))
+            except AttributeError:
+                # Skip documents that don't have the expected structure
+                print(f"Warning: Skipping document with ID {doc_id} due to incompatible format")
 
     # Create sparse retriever - BM25 Keyword search from the original documents
 
-    bm25_retriever = BM25Retriever.from_documents(docs)
+    bm25_retriever = BM25Retriever.from_documents(all_docs)
     bm25_retriever.k = k # number of documents to be retreived
 
     # Combine the retrievers
