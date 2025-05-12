@@ -15,7 +15,7 @@ def render():
         return
     
     # Show current document info
-    st.info(f"Using document: **{st.session_state.pdf_name}**")
+    st.info(f"Using document: **{st.session_state.pdf_names}**")
     
     # Query input
     query = st.text_input("Enter your question:")
