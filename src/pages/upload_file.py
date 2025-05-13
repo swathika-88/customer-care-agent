@@ -5,6 +5,7 @@ from utils.rag_embeddings.chunking import load_and_split_pdf
 from utils.rag_embeddings.vector_store import create_vector_store
 from utils.rag_embeddings.retriever import create_hybrid_retriever
 from utils.rag_embeddings.generation import create_generator
+from utils.rag_embeddings.embedding import embeddings
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -85,9 +86,18 @@ def render():
                     st.session_state.chunks = all_chunks
                     st.write(f"✅ All documents processed into {len(all_chunks)} total chunks")
                     
-                    # Step 2: Create vector store from all chunks
+                    # Step 2: Create embeddings from all chunks
+                    st.write("🔄 Computing embeddings...")
+                    embed_docs = embeddings(all_chunks)
+                    st.session_state.embeddings = embed_docs
+                    st.write("✅ Embeddings created")
+                    
+                    # Step 3: Create vector store using pre-computed embeddings
                     st.write("🔄 Creating vector store...")
-                    vector_store = create_vector_store(documents=all_chunks)
+                    vector_store = create_vector_store(
+                        documents=all_chunks,
+                        embed_docs=embed_docs
+                    )
                     st.session_state.vector_store = vector_store
                     st.write("✅ Vector store created")
                     
