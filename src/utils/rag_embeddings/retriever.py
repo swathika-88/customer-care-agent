@@ -19,7 +19,7 @@ def create_hybrid_retriever(vector_store,k=4,embedding_model_name= "all-MiniLM-L
     # If vector_store is a string, load it from disk
     if isinstance(vector_store, str):
         embedding_function = SentenceTransformerEmbeddings(model_name=embedding_model_name)
-        vector_store = FAISS.load_local(vector_store, embedding_function)
+        vector_store = FAISS.load_local(vector_store, embedding_function,allow_dangerous_deserialization=True)
     
     # Create FAISS retriever
     faiss_retriever = vector_store.as_retriever(search_kwargs={"k": k})
