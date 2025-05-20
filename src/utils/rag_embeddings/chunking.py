@@ -26,11 +26,11 @@ def load_and_split_pdf(file_obj, chunk_size=1000, chunk_overlap=200, metadata=No
          tmp_path = file_obj
     
     # Load the PDF
-         loader = PyPDFLoader(tmp_path)
-         documents = loader.load()
+    loader = PyPDFLoader(tmp_path)
+    documents = loader.load()
         
         # Add source metadata to each document
-         if metadata:
+    if metadata:
             for doc in documents:
                 # Add provided metadata while preserving existing metadata
                 if not doc.metadata:
@@ -41,18 +41,18 @@ def load_and_split_pdf(file_obj, chunk_size=1000, chunk_overlap=200, metadata=No
                 if 'page' not in doc.metadata:
                     doc.metadata['page'] = doc.metadata.get('page', 0)
         
-        # Create text splitter
-         text_splitter = RecursiveCharacterTextSplitter(
+    # Create text splitter
+    text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=chunk_size,
             chunk_overlap=chunk_overlap,
             length_function=len,
         )
         
         # Split documents
-         chunks = text_splitter.split_documents(documents)
+    chunks = text_splitter.split_documents(documents)
         
         # Ensure each chunk has proper metadata
-         for i, chunk in enumerate(chunks):
+    for i, chunk in enumerate(chunks):
             # Add chunk number for tracking
              chunk.metadata['chunk_id'] = i
             # Make sure each chunk has source info

@@ -71,14 +71,14 @@ def render():
                         st.write(f"🔄 Processing: {file_name}")
                         
                         # Step 1: Load and chunk the PDF
-                        chunks = load_and_split_pdf(
+                        chunk = load_and_split_pdf(
                             uploaded_file, 
                             # Include source filename in metadata
                             metadata={"source": file_name}
                         )
                         
-                        st.write(f"✅ {file_name} processed into {len(chunks)} chunks")
-                        all_chunks.extend(chunks)
+                        st.write(f"✅ {file_name} processed into {len(chunk)} chunks")
+                        all_chunks.extend(chunk)
                         
                         # Update progress bar
                         progress_bar.progress((i + 1) / total_files)
@@ -86,28 +86,22 @@ def render():
                     st.session_state.chunks = all_chunks
                     st.write(f"✅ All documents processed into {len(all_chunks)} total chunks")
                     
-                    # Step 2: Create embeddings from all chunks
-                    st.write("🔄 Computing embeddings...")
-                    embed_docs = embeddings(all_chunks)
-                    st.session_state.embeddings = embed_docs
-                    st.write("✅ Embeddings created")
-                    
-                    # Step 3: Create vector store using pre-computed embeddings
+
+                    # Step 2: Create vector store using pre-computed embeddings
                     st.write("🔄 Creating vector store...")
                     vector_store = create_vector_store(
-                        documents=all_chunks,
-                        embed_docs=embed_docs
+                        documents=all_chunks
                     )
                     st.session_state.vector_store = vector_store
                     st.write("✅ Vector store created")
                     
-                    # Step 3: Create retriever
+                    # Step 4: Create retriever
                     st.write("🔄 Setting up retriever...")
                     retriever = create_hybrid_retriever(vector_store=vector_store)
                     st.session_state.retriever = retriever
                     st.write("✅ Retriever ready")
                     
-                    # Step 4: Create generator
+                    # Step 5: Create generator
                     st.write("🔄 Setting up generator...")
                     generator = create_generator(retriever=retriever)
                     st.session_state.generator = generator

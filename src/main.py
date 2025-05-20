@@ -6,7 +6,7 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
 
 # Import page modules
-from pages import upload_file, chatbot
+from pages import upload_file, chatbot, evaluation
 
 def main():
     """Main application entry point"""
@@ -19,13 +19,15 @@ def main():
     
     # Sidebar: Navigation
     st.sidebar.title("Navigation")
-    page = st.sidebar.radio("Go to", ["File Upload", "Chatbot"])
+    page = st.sidebar.radio("Go to", ["File Upload", "Chatbot","Evaluation"])
     
     # Load the appropriate page
     if page == "File Upload":
         upload_file.render()
     elif page == "Chatbot":
         chatbot.render()
+    elif page == "Evaluation":
+        evaluation.render()
 
 if __name__ == "__main__":
     main()

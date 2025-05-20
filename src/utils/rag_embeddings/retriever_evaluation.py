@@ -1,6 +1,5 @@
 from langchain.chains import RetrievalQA
 from langchain.chat_models import ChatOpenAI
-from langchain.evaluation.qa import QAEvalChain
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -16,74 +15,99 @@ load_dotenv()
 
 API_KEY1 = os.getenv("API_KEY1")
 
-def evaluate_rag_pipeline(retriever, ground_truth, api_key = API_KEY1,model_name= "gpt-4", k=4):
+def evaluate_rag_pipeline_simple(retriever, ground_truth, api_key=API_KEY1, model_name="gpt-4"):
     """
-    Evaluate RAG pipeline using LLM-based QA eval.
+    Evaluate RAG pipeline using a simpler direct LLM evaluation approach.
     """
+    # Create the chat model for both QA and evaluation
     llm = ChatOpenAI(openai_api_key=api_key, model=model_name)
     
+    # Create the QA chain
     qa_chain = RetrievalQA.from_chain_type(
         llm=llm,
         retriever=retriever,
         return_source_documents=True
     )
 
-    predictions = []
+    # This will store our evaluation results
+    results = []
+    
+    # Process each ground truth item
     for item in ground_truth:
-        result = qa_chain({"query": item["query"]})
-        predictions.append({
-            "query": item["query"],
-            "reference": item["reference_answer"],
-            "prediction": result["result"],
-            "docs": result["source_documents"]
+        query = item["query"]
+        reference_answer = item["reference_answers"]
+        
+        # Get the prediction from our RAG pipeline
+        result = qa_chain({"query": query})
+        prediction = result["result"]
+        source_docs = result["source_documents"]
+        
+        # Create an evaluation prompt
+        eval_prompt = f"""
+        Please evaluate if the following answer correctly addresses the question based on the reference answer.
+        
+        Question: {query}
+        
+        Reference Answer: {reference_answer}
+        
+        Predicted Answer: {prediction}
+        
+        Determine if the predicted answer is CORRECT or INCORRECT based on the reference.
+        Explain your reasoning briefly, then end with either "CORRECT" or "INCORRECT".
+        """
+        
+        # Get the evaluation from the LLM
+        evaluation = llm.predict(eval_prompt)
+        
+        # Determine if the answer was correct based on the evaluation
+        is_correct = "CORRECT" in evaluation.upper()
+        
+        # Store the results
+        results.append({
+            "query": query,
+            "reference": reference_answer,
+            "prediction": prediction,
+            "docs": source_docs,
+            "results": evaluation,
+            "is_correct": is_correct
         })
-
-    # Evaluate using LLM
-    eval_chain = QAEvalChain.from_llm(llm)
-    graded_results = eval_chain.evaluate(
-        predictions,
-        question_key="query",
-        prediction_key="prediction",
-        reference_key="reference"
-    )
-
-    # Combine scores
-    scored = [
-        {
-            **pred,
-            **grade
-        } for pred, grade in zip(predictions, graded_results)
-    ]
-
-    return scored
-
+    
+    return results
 
 
 def visualize_rag_results(results):
     df = pd.DataFrame(results)
     
     # Binary pass/fail based on LLM judgment
-    df["Correct"] = df["results"].apply(lambda x: 1 if "CORRECT" in x.upper() else 0)
+    df["Correct"] = df["is_correct"].astype(int)
 
     # Plot
     fig, ax = plt.subplots(figsize=(8, 4))
-    df["Correct"].value_counts().plot(kind="bar", ax=ax, color=["salmon", "skyblue"])
+    
+    # Create a new DataFrame with both categories guaranteed
+    plot_data = pd.DataFrame({
+        'Category': ['Incorrect', 'Correct'],
+        'Count': [
+            sum(df["Correct"] == 0),  # Count of incorrect
+            sum(df["Correct"] == 1)   # Count of correct
+        ]
+    })
+    
+    # Plot the bars with fixed colors
+    ax.bar(plot_data['Category'], plot_data['Count'], color=["salmon", "skyblue"])
+    
     ax.set_title("RAG Answer Correctness (LLM Judgment)")
-    ax.set_xticklabels(["Incorrect", "Correct"], rotation=0)
     ax.set_ylabel("Count")
+    
+    # Add percentage labels on the bars
+    total = len(df)
+    for i, row in enumerate(plot_data.itertuples()):
+        count = row.Count
+        percentage = 100 * count / total if total > 0 else 0
+        ax.text(i, count + 0.1, f"{percentage:.1f}%", ha="center")
+    
     plt.tight_layout()
     plt.show()
 
     return df
 
-
-file_path = r"C:\Users\dceka\OneDrive\Desktop\Swathika\innovapth\ML_AI\GEN_AI\customer_care_agent_tesla\customer_care_agent\resources\Tesla_Owners_Manual_Model_X.pdf"
-save_path = r"C:\Users\dceka\OneDrive\Desktop\Swathika\innovapth\ML_AI\GEN_AI\customer_care_agent_tesla\customer_care_agent\src\utils\rag_embeddings"
-chunks = load_and_split_pdf(file_path)
-
-vector_store = create_vector_store(chunks,save_path)
-retriever = create_hybrid_retriever(vector_store)
-
-rag_results = evaluate_rag_pipeline(retriever, ground_truth)
-df_eval = visualize_rag_results(rag_results)
-print(df_eval[["query", "prediction", "reference", "results"]])

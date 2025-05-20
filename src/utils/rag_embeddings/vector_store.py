@@ -1,7 +1,7 @@
 from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings.sentence_transformer import SentenceTransformerEmbeddings
-from chunking import load_and_split_pdf
-def create_vector_store(documents, embedding_model_name= "all-MiniLM-L6-v2", save_path= None):
+from langchain_huggingface import HuggingFaceEmbeddings
+def create_vector_store(documents, embedding_model_name= "sentence-transformers/all-MiniLM-L6-v2", save_path= None):
     """
     Create a FAISS vector store from documents.
     
@@ -14,17 +14,17 @@ def create_vector_store(documents, embedding_model_name= "all-MiniLM-L6-v2", sav
         A FAISS vector store instance
     """
     # Create embedding function
-    embedding_function = SentenceTransformerEmbeddings(model_name=embedding_model_name)
+    embedding_function = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
     print(f"Using embedding model: {embedding_model_name}")
     # Extract text and metadata
-    texts = [doc.page_content for doc in documents]
-    metadatas = [doc.metadata for doc in documents] if hasattr(documents[0], 'metadata') else None
+    #texts = [doc.page_content for doc in documents]
+   # metadatas = [doc.metadata for doc in documents] if hasattr(documents[0], 'metadata') else None
     
     # Create vector store
     vector_store = FAISS.from_documents(
         documents=documents ,
         embedding=embedding_function,
-        metadatas=metadatas
+        
     )
     # Save vector store if path is provided
     if save_path:
@@ -33,8 +33,3 @@ def create_vector_store(documents, embedding_model_name= "all-MiniLM-L6-v2", sav
     
     return vector_store
 
-file_path = r"C:\Users\dceka\OneDrive\Desktop\Swathika\innovapth\ML_AI\GEN_AI\customer_care_agent_tesla\customer_care_agent\resources\Tesla_Owners_Manual_Model_X.pdf"
-save_path = r"C:\Users\dceka\OneDrive\Desktop\Swathika\innovapth\ML_AI\GEN_AI\customer_care_agent_tesla\customer_care_agent\src\utils\rag_embeddings"
-chunks = load_and_split_pdf(file_path)
-
-vector_store = create_vector_store(chunks,save_path)
