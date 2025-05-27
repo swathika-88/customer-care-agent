@@ -322,8 +322,8 @@ def render():
                 st.metric("⚖️ F1 Score", f"{metrics['f1_score']:.3f}", f"{metrics['f1_score']*100:.1f}%")
             
             # Detailed results
-            with st.expander("📋 Detailed Evaluation Results"):
-                for i, result in enumerate(st.session_state.eval_results):
+            st.subheader("📋 Detailed Evaluation Results")
+            for i, result in enumerate(st.session_state.eval_results):
                     status_icon = "✅" if result['is_correct'] else "❌"
                     st.write(f"### {status_icon} Question {i+1}")
                     st.write(f"**Query:** {result['query']}")
