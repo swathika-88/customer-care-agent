@@ -9,3 +9,6 @@ cryptography>=3.1
 faiss-cpu
 rank_bm25
 matplotlib
+langchain-groq
+scikit-learn
+seaborn

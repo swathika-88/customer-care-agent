@@ -1,31 +1,34 @@
-from langchain.chat_models import ChatOpenAI
+from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 import os 
 from dotenv import load_dotenv
 
-
 load_dotenv()
 
-API_KEY1 = os.getenv("API_KEY1")
+API_KEY1 = os.getenv("API_KEY1")  # This should be your Groq API key
 
 
-def create_generator(retriever,api_key = API_KEY1,model_name= "gpt-4",custom_prompt= None):
+def create_generator(retriever, api_key=API_KEY1, model_name="llama-3.1-8b-instant", custom_prompt=None):
     """
-    Create a RAG generator chain.
+    Create a RAG generator chain using Groq API.
     
     Args:
         retriever: A retriever instance
-        api_key: OpenAI API key
-        model_name: Name of the LLM to use
+        api_key: Groq API key
+        model_name: Name of the LLM to use (Groq model)
         custom_prompt: Optional custom prompt template
         
     Returns:
         A RAG chain instance
     """
-    # Initialize LLM
-    llm = ChatOpenAI(openai_api_key=api_key, model=model_name)
+    # Initialize Groq LLM
+    llm = ChatGroq(
+        groq_api_key=api_key,
+        model_name=model_name,
+        temperature=0  # You can adjust this as needed
+    )
     
     # Create prompt template
     if custom_prompt:

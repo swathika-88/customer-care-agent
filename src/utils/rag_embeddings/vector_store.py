@@ -25,6 +25,7 @@ def create_vector_store(documents, embedding_model_name= "sentence-transformers/
         documents=documents ,
         embedding=embedding_function,
         
+        
     )
     # Save vector store if path is provided
     if save_path:
