@@ -12,3 +12,7 @@ matplotlib
 langchain-groq
 scikit-learn
 seaborn
+fastapi
+uvicorn[standard]
+python-multipart
+aiofiles
