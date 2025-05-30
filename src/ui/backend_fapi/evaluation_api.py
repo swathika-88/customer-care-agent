@@ -17,7 +17,7 @@ class EvaluationRequest(BaseModel):
 def evaluate_rag(request: EvaluationRequest):
     try:
         retriever = get_retriever()
-        results = evaluate_rag_pipeline(retriever, [q.dict() for q in request.questions], model_name=request.model_name)
+        results = evaluate_rag_pipeline(retriever, [q.model_dump() for q in request.questions], model_name=request.model_name)
         metrics = calculate_metrics(results)
         return {
             "metrics": metrics,
